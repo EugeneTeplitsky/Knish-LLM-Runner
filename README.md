@@ -4,7 +4,7 @@ Knish LLM Runner is a FastAPI-based service for running large language models (L
 
 ## Features
 
-- Support for multiple LLM providers (OpenAI, Anthropic, ARM)
+- Support for multiple LLM providers (OpenAI, Anthropic, Ollama, ARM)
 - Asynchronous request handling
 - Built-in caching and queuing system
 - Configurable via environment variables or command-line arguments
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 Configure the application using environment variables or by creating a `.env` file in the project root. Here are the available configuration options:
 
-- `LLM_DRIVER`: The LLM driver to use (openai, anthropic, arm)
+- `LLM_DRIVER`: The LLM driver to use (openai, anthropic, ollama, arm)
 - `OPENAI_API_KEY`: Your OpenAI API key
 - `OPENAI_MODEL`: The OpenAI model to use (default: gpt-3.5-turbo)
 - `ANTHROPIC_API_KEY`: Your Anthropic API key

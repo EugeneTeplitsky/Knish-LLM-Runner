@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knish-llm-runner"
+version = "0.1.0"
+description = "A package for running large language models"
+authors = [{name = "Eugene Teplitsky", email = "eugene@wishknish.com"}]
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "pydantic",
+    "python-dotenv",
+    "openai",
+    "anthropic",
+    "llama-cpp-python",
+    "aiosqlite",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/EugeneTeplitsky/Knish-LLM-Runner"
+"Bug Tracker" = "https://github.com/EugeneTeplitsky/Knish-LLM-Runner/issues"

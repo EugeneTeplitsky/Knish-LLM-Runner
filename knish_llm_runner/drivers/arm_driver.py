@@ -6,7 +6,7 @@ from ..utils.logging import setup_logging
 logger = setup_logging(__name__, logfile='driver')
 
 
-def _convert_messages_to_prompt(messages: List[Dict[str, str]]) -> str:
+def convert_messages_to_prompt(messages: List[Dict[str, str]]) -> str:
     prompt = ""
     for message in messages:
         if message['role'] == 'system':
@@ -40,7 +40,7 @@ class ARMDriver(BaseLLMDriver):
             max_tokens: int
     ) -> str:
         try:
-            prompt = _convert_messages_to_prompt(messages)
+            prompt = convert_messages_to_prompt(messages)
 
             output = self.llm(
                 prompt,

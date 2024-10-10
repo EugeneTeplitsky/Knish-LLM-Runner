@@ -6,7 +6,7 @@ from ..utils.logging import setup_logging
 logger = setup_logging(__name__, logfile='driver')
 
 
-def _convert_messages_to_anthropic_format(messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
+def convert_messages_to_prompt(messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
     anthropic_messages = []
     for message in messages:
         role = message['role']
@@ -39,7 +39,7 @@ class AnthropicDriver(BaseLLMDriver):
     ) -> str:
         try:
             # Convert messages to Anthropic's format
-            anthropic_messages = _convert_messages_to_anthropic_format(messages)
+            anthropic_messages = convert_messages_to_prompt(messages)
 
             logger.debug(f"Sending request to Anthropic API with messages: {anthropic_messages}")
 

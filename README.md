@@ -30,7 +30,9 @@ Configure the application using environment variables or by creating a `.env` fi
 - `OPENAI_API_KEY`: Your OpenAI API key
 - `OPENAI_MODEL`: The OpenAI model to use (default: gpt-3.5-turbo)
 - `ANTHROPIC_API_KEY`: Your Anthropic API key
-- `ANTHROPIC_MODEL`: The Anthropic model to use (default: claude-2)
+- `ANTHROPIC_MODEL`: The Anthropic model to use (default: claude-3-haiku-20240307)
+- `OLLAMA_API_URL`: URL for the Ollama API (default: http://localhost:11434)
+- `OLLAMA_MODEL`: The Ollama model to use (default: llama3.2:1b)
 - `ARM_MODEL_PATH`: Path to the ARM model
 - `TEMPERATURE`: Temperature for LLM generation (default: 0.7)
 - `MAX_TOKENS`: Maximum tokens for LLM generation (default: 1000)

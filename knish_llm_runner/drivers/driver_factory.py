@@ -1,5 +1,6 @@
 from typing import Dict
 from .base_driver import BaseLLMDriver, LLMError
+from .ollama_driver import OllamaDriver
 from .openai_driver import OpenAIDriver
 from .anthropic_driver import AnthropicDriver
 from .arm_driver import ARMDriver
@@ -19,6 +20,8 @@ class LLMDriverFactory:
                 return OpenAIDriver(api_key=config['openai_api_key'], model=config['openai_model'])
             elif driver_type == 'anthropic':
                 return AnthropicDriver(api_key=config['anthropic_api_key'], model=config['anthropic_model'])
+            elif driver_type == 'ollama':
+                return OllamaDriver(api_url=config['ollama_api_url'], model=config['ollama_model'])
             elif driver_type == 'arm':
                 return ARMDriver(
                     model_path=config['arm_model_path'],

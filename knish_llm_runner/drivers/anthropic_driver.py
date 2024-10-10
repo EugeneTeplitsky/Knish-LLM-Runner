@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, AsyncGenerator
 import anthropic
 from .base_driver import BaseLLMDriver, LLMError
 from ..utils.logging import setup_logging
@@ -64,3 +64,28 @@ class AnthropicDriver(BaseLLMDriver):
         except Exception as e:
             logger.error(f"Unexpected error in Anthropic driver: {str(e)}")
             raise LLMError(f"Unexpected error in Anthropic driver: {str(e)}")
+
+    async def generate_stream(
+            self,
+            messages: List[Dict[str, str]],
+            temperature: float,
+            max_tokens: int
+    ) -> AsyncGenerator[str, None]:
+        try:
+            anthropic_messages = convert_messages_to_prompt(messages)
+            stream = await self.client.messages.create(
+                model=self.model,
+                messages=anthropic_messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                stream=True
+            )
+            async for chunk in stream:
+                if chunk.delta.text:
+                    yield chunk.delta.text
+        except anthropic.APIError as e:
+            logger.error(f"Anthropic API streaming error: {str(e)}")
+            raise LLMError(f"Anthropic API streaming error: {str(e)}")
+        except Exception as e:
+            logger.error(f"Unexpected error in Anthropic driver streaming: {str(e)}")
+            raise LLMError(f"Unexpected error in Anthropic driver streaming: {str(e)}")

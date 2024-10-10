@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, AsyncGenerator
 from ..drivers.driver_factory import LLMDriverFactory
 from ..database.database_factory import DatabaseFactory
 from ..utils.logging import setup_logging
@@ -74,3 +74,48 @@ class LLMService:
 
         await queue_service.enqueue(lambda: completion_task(messages))
         return await queue_service.dequeue()
+
+    async def generate_stream(
+            self,
+            messages: List[Dict[str, str]],
+            temperature: float = None,
+            max_tokens: int = None
+    ) -> AsyncGenerator[str, None]:
+        """
+        Generate a streaming completion using the LLM driver.
+
+        :yield: Chunks of the generated completion
+        """
+        try:
+            query = messages[-1]['content']
+            logger.info(f"Generating streaming completion for query: {query}")
+            logger.debug(f"Temperature: {temperature}, Max tokens: {max_tokens}")
+
+            cached_response = await self.db_connector.get_existing_query(query)
+            if cached_response:
+                logger.info(f"Returning cached response for query: {query}")
+                yield cached_response['output']
+                return
+
+            full_response = ""
+            async for chunk in self.driver.generate_stream(
+                    messages=messages,
+                    temperature=temperature or CONFIG['temperature'],
+                    max_tokens=max_tokens or CONFIG['max_tokens']
+            ):
+                full_response += chunk
+                yield chunk
+
+            query_id = await self.db_connector.record_query(
+                query,
+                CONFIG['llm_driver'],
+                full_response
+            )
+
+            logger.info(f"Generated and stored new streaming completion for query: {query}")
+            logger.debug(f"Generated completion: {full_response}")
+            logger.debug(f"Query ID: {query_id}")
+
+        except Exception as e:
+            logger.error(f"Error in generate_stream: {str(e)}", exc_info=True)
+            raise

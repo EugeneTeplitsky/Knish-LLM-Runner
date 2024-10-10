@@ -1,6 +1,7 @@
 import pytest
 from knish_llm_runner import CONFIG, LLMService
 
+
 @pytest.mark.asyncio
 @pytest.mark.skipif(not CONFIG.get('ollama_api_url'), reason="Ollama API URL not found")
 async def test_ollama_driver(config, driver_selector):

@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+
 def get_config():
     return {
         'llm_driver': os.getenv('LLM_DRIVER', 'openai').lower(),

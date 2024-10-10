@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, AsyncGenerator
 from llama_cpp import Llama
 from .base_driver import BaseLLMDriver, LLMError
 from ..utils.logging import setup_logging
@@ -41,7 +41,6 @@ class ARMDriver(BaseLLMDriver):
     ) -> str:
         try:
             prompt = convert_messages_to_prompt(messages)
-
             output = self.llm(
                 prompt,
                 max_tokens=max_tokens,
@@ -52,3 +51,24 @@ class ARMDriver(BaseLLMDriver):
         except Exception as e:
             logger.error(f"Error in ARM driver: {str(e)}")
             raise LLMError(f"ARM generation error: {str(e)}")
+
+    async def generate_stream(
+            self,
+            messages: List[Dict[str, str]],
+            temperature: float,
+            max_tokens: int
+    ) -> AsyncGenerator[str, None]:
+        try:
+            prompt = convert_messages_to_prompt(messages)
+            stream = self.llm(
+                prompt,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                stop=["Human:", "Assistant:"],
+                stream=True
+            )
+            for output in stream:
+                yield output['choices'][0]['text']
+        except Exception as e:
+            logger.error(f"Error in ARM driver streaming: {str(e)}")
+            raise LLMError(f"ARM streaming error: {str(e)}")

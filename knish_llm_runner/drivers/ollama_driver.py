@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, AsyncGenerator
 import aiohttp
 import json
 from .base_driver import BaseLLMDriver, LLMError
@@ -32,6 +32,17 @@ class OllamaDriver(BaseLLMDriver):
             temperature: float,
             max_tokens: int
     ) -> str:
+        full_response = ""
+        async for chunk in self.generate_stream(messages, temperature, max_tokens):
+            full_response += chunk
+        return full_response
+
+    async def generate_stream(
+            self,
+            messages: List[Dict[str, str]],
+            temperature: float,
+            max_tokens: int
+    ) -> AsyncGenerator[str, None]:
         try:
             prompt = convert_messages_to_prompt(messages)
             async with aiohttp.ClientSession() as session:
@@ -42,24 +53,20 @@ class OllamaDriver(BaseLLMDriver):
                             "prompt": prompt,
                             "temperature": temperature,
                             "max_length": max_tokens,
-                            "stream": False  # Set to False to get a single response
+                            "stream": True
                         }
                 ) as response:
                     if response.status != 200:
                         raise LLMError(f"Ollama API error: {response.status}")
 
-                    full_response = ""
                     async for line in response.content:
                         if line:
                             try:
                                 data = json.loads(line)
                                 if 'response' in data:
-                                    full_response += data['response']
+                                    yield data['response']
                             except json.JSONDecodeError:
                                 logger.warning(f"Failed to parse JSON from line: {line}")
-
-                    return full_response.strip()
         except Exception as e:
             logger.error(f"Error in Ollama driver: {str(e)}")
             raise LLMError(f"Ollama generation error: {str(e)}")
-

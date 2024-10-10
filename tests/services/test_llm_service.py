@@ -1,6 +1,7 @@
 import pytest
 from knish_llm_runner.services.llm_service import LLMService
 
+
 @pytest.mark.asyncio
 async def test_llm_service_caching(config, driver_selector, test_db):
     driver = driver_selector('arm')

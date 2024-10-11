@@ -4,7 +4,6 @@ from ..utils.logging import setup_logging
 
 logger = setup_logging(__name__, 'database')
 
-
 class NoneDatabase(BaseDatabase):
     async def connect(self):
         logger.info("NoneDatabase connected (no-op)")
@@ -12,7 +11,7 @@ class NoneDatabase(BaseDatabase):
     async def disconnect(self):
         logger.info("NoneDatabase disconnected (no-op)")
 
-    async def record_query(self, query: str, driver: str, output: str) -> str:
+    async def record_query(self, query: str, driver: str, output: str, token_usage: Dict[str, int]) -> str:
         logger.debug(f"NoneDatabase: Not recording query: {query[:50]}...")
         return "none:0"  # Return a dummy query ID
 

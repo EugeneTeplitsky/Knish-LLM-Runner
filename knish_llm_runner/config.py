@@ -25,6 +25,7 @@ def get_config():
         'db_path': os.getenv('DB_PATH', 'llm_api_runner.db'),
         'runner_host': os.getenv('RUNNER_HOST', '0.0.0.0'),
         'runner_port': int(os.getenv('RUNNER_PORT', '8008')),
+        'api_key': os.getenv('API_KEY')
     }
 
 

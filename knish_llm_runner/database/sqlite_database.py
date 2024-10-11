@@ -2,9 +2,9 @@ import aiosqlite
 from typing import Dict, Optional
 from .base_database import BaseDatabase
 from ..utils.logging import setup_logging
+import json
 
 logger = setup_logging(__name__, 'database')
-
 
 class SQLiteDatabase(BaseDatabase):
     def __init__(self, db_path: str):
@@ -39,7 +39,8 @@ class SQLiteDatabase(BaseDatabase):
                     id TEXT PRIMARY KEY,
                     query TEXT UNIQUE,
                     driver TEXT,
-                    output TEXT
+                    output TEXT,
+                    token_usage TEXT
                 )
             ''')
             await self.conn.commit()
@@ -47,12 +48,12 @@ class SQLiteDatabase(BaseDatabase):
             logger.error(f"Error creating tables: {str(e)}")
             raise
 
-    async def record_query(self, query: str, driver: str, output: str) -> str:
+    async def record_query(self, query: str, driver: str, output: str, token_usage: Dict[str, int]) -> str:
         try:
             query_id = f"{driver}:{hash(query)}"
             await self.conn.execute(
-                "INSERT OR REPLACE INTO queries (id, query, driver, output) VALUES (?, ?, ?, ?)",
-                (query_id, query, driver, output)
+                "INSERT OR REPLACE INTO queries (id, query, driver, output, token_usage) VALUES (?, ?, ?, ?, ?)",
+                (query_id, query, driver, output, json.dumps(token_usage))
             )
             await self.conn.commit()
             logger.info(f"Recorded query with ID: {query_id}")
@@ -70,7 +71,8 @@ class SQLiteDatabase(BaseDatabase):
                         "id": row[0],
                         "query": row[1],
                         "driver": row[2],
-                        "output": row[3]
+                        "output": row[3],
+                        "token_usage": json.loads(row[4])
                     }
             return None
         except Exception as e:

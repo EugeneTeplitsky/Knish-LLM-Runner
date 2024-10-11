@@ -1,8 +1,5 @@
-# File: llm_api_runner/database/base_database.py
-
 from abc import ABC, abstractmethod
 from typing import Dict, Optional
-
 
 class BaseDatabase(ABC):
     @abstractmethod
@@ -14,7 +11,7 @@ class BaseDatabase(ABC):
         pass
 
     @abstractmethod
-    async def record_query(self, query: str, driver: str, output: str) -> str:
+    async def record_query(self, query: str, driver: str, output: str, token_usage: Dict[str, int]) -> str:
         """
         Record a new query and return its ID.
         """

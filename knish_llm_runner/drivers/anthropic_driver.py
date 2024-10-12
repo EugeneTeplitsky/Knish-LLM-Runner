@@ -89,3 +89,7 @@ class AnthropicDriver(BaseLLMDriver):
         except Exception as e:
             logger.error(f"Unexpected error in Anthropic driver streaming: {str(e)}")
             raise LLMError(f"Unexpected error in Anthropic driver streaming: {str(e)}")
+
+    async def get_available_models(self) -> List[str]:
+        # Anthropic doesn't have a models list endpoint, so we'll return a predefined list
+        return ["claude-3-5-sonnet-20240620", "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"]

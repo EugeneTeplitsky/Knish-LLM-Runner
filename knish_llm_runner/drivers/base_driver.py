@@ -43,3 +43,8 @@ class BaseLLMDriver(ABC):
         :raises LLMError: If an error occurs during generation
         """
         pass
+
+    @abstractmethod
+    async def get_available_models(self) -> List[str]:
+        """Fetch and return a list of available models for this driver."""
+        pass

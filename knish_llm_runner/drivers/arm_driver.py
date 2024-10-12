@@ -1,6 +1,8 @@
+import os
 from typing import List, Dict, AsyncGenerator
 from llama_cpp import Llama
 from .base_driver import BaseLLMDriver, LLMError
+from .. import CONFIG
 from ..utils.logging import setup_logging
 
 logger = setup_logging(__name__, logfile='driver')
@@ -72,3 +74,8 @@ class ARMDriver(BaseLLMDriver):
         except Exception as e:
             logger.error(f"Error in ARM driver streaming: {str(e)}")
             raise LLMError(f"ARM streaming error: {str(e)}")
+
+    async def get_available_models(self) -> List[str]:
+        if CONFIG.get('arm_model_path'):
+            return [os.path.splitext(os.path.basename(CONFIG.get('arm_model_path')))[0]]
+        return []

@@ -50,3 +50,11 @@ class OpenAIDriver(BaseLLMDriver):
         except Exception as e:
             logger.error(f"Error in OpenAI driver streaming: {str(e)}")
             raise LLMError(f"OpenAI API streaming error: {str(e)}")
+
+    async def get_available_models(self) -> List[str]:
+        try:
+            response = await self.client.models.list()
+            return [model.id for model in response.data]
+        except Exception as e:
+            print(f"Error fetching OpenAI models: {e}")
+            return []

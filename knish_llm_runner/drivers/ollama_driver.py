@@ -70,3 +70,16 @@ class OllamaDriver(BaseLLMDriver):
         except Exception as e:
             logger.error(f"Error in Ollama driver: {str(e)}")
             raise LLMError(f"Ollama generation error: {str(e)}")
+
+    async def get_available_models(self) -> List[str]:
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(f"{self.api_url}/api/tags") as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        return [model['name'] for model in data['models']]
+                    else:
+                        return []
+            except Exception as e:
+                print(f"Error fetching Ollama models: {e}")
+                return []

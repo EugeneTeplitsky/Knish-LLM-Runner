@@ -4,6 +4,7 @@ from ..utils.logging import setup_logging
 
 logger = setup_logging(__name__, 'database')
 
+
 class NoneDatabase(BaseDatabase):
     async def connect(self):
         logger.info("NoneDatabase connected (no-op)")

@@ -1,6 +1,7 @@
 from asyncio import Queue
 from typing import Any, Callable, Coroutine
 
+
 class QueueService:
     def __init__(self):
         self.queue = Queue()
@@ -32,6 +33,7 @@ class QueueService:
 
     def queue_size(self) -> int:
         return self.queue.qsize()
+
 
 # Create a global instance of QueueService
 queue_service = QueueService()

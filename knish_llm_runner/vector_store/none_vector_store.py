@@ -4,6 +4,7 @@ from ..utils.logging import setup_logging
 
 logger = setup_logging(__name__, 'vector_store')
 
+
 class NoneVectorStore(BaseVectorStore):
     async def add_documents(self, documents: List[Document]):
         logger.info(f"NoneVectorStore: Not adding {len(documents)} documents (no-op)")

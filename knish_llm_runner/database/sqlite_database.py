@@ -6,6 +6,7 @@ import json
 
 logger = setup_logging(__name__, 'database')
 
+
 class SQLiteDatabase(BaseDatabase):
     def __init__(self, db_path: str):
         self.db_path = db_path

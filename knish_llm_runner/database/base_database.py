@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
+
 class BaseDatabase(ABC):
     @abstractmethod
     async def connect(self):

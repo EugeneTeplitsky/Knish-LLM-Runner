@@ -6,6 +6,7 @@ from ..config import CONFIG
 
 logger = setup_logging(__name__, 'document_processing')
 
+
 class EmbeddingGenerator:
     def __init__(self, model_name: str = CONFIG['document_processing'].get('embedding_model', 'all-MiniLM-L6-v2')):
         self.model = SentenceTransformer(model_name)

@@ -8,6 +8,7 @@ from .queue_service import queue_service
 
 logger = setup_logging(__name__, 'service')
 
+
 def count_tokens(text: str, model: str) -> int:
     try:
         encoder = tiktoken.encoding_for_model(model)
@@ -16,6 +17,7 @@ def count_tokens(text: str, model: str) -> int:
         logger.warning(f"Model {model} not found. Using cl100k_base encoding.")
         encoder = tiktoken.get_encoding("cl100k_base")
         return len(encoder.encode(text))
+
 
 class LLMService:
     def __init__(self, config: Dict):

@@ -67,7 +67,9 @@ def get_config():
         },
     }
 
+
 CONFIG = get_config()
+
 
 def update_config(updates):
     CONFIG.update(updates)

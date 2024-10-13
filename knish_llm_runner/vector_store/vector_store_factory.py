@@ -6,6 +6,7 @@ from ..utils.logging import setup_logging
 
 logger = setup_logging(__name__, logfile='vector_store')
 
+
 class VectorStoreFactory:
     @staticmethod
     def create_store(config: Dict) -> BaseVectorStore:

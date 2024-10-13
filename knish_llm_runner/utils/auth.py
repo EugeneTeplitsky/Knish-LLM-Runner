@@ -4,6 +4,7 @@ from ..config import CONFIG
 
 API_KEY_HEADER = APIKeyHeader(name="Authorization", auto_error=False)
 
+
 async def verify_api_key(api_key: str = Depends(API_KEY_HEADER)):
     if not api_key or not api_key.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Invalid API key")

@@ -4,6 +4,7 @@ from knish_llm_runner.utils.logging import setup_logging
 
 logger = setup_logging(__name__, 'pdf')
 
+
 def process_pdf(file_path: str) -> str:
     """
     Process a PDF file and extract its text content.

@@ -1,21 +1,20 @@
-from fastapi import APIRouter, UploadFile, File, Depends, Query
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Query
 from ..document_processing.document_ingestion import DocumentIngestion
+from ..models.document_list_response import DocumentListResponse
+from ..models.document_response import DocumentResponse
 from ..utils.auth import verify_api_key
 from ..utils.logging import setup_logging
 from ..config import CONFIG
 import os
 import uuid
-from typing import List, Dict
 
 router = APIRouter()
 logger = setup_logging(__name__, 'api')
 
-# Initialize DocumentIngestion
 document_ingestion = DocumentIngestion()
 
 
-@router.post("/v1/documents")
+@router.post("/v1/documents", response_model=DocumentResponse)
 async def upload_document(
         file: UploadFile = File(...),
         api_key: str = Depends(verify_api_key)
@@ -27,39 +26,41 @@ async def upload_document(
         with open(file_location, "wb+") as file_object:
             file_object.write(file.file.read())
 
-        result = await document_ingestion.ingest_and_process(file_location)
+        document = await document_ingestion.ingest_and_process(file_location)
 
         os.remove(file_location)
 
-        return JSONResponse(
-            status_code=200,
-            content={
-                "message": "Document processed and stored successfully",
-                "document": {
-                    "id": result["id"],
-                    "filename": result["filename"],
-                    "content_preview": result["content_preview"],
-                    "total_characters": result["total_characters"],
-                    "file_type": result["file_type"]
-                }
-            }
+        return DocumentResponse(
+            id=document.id,
+            filename=document.filename,
+            content_preview=document.content_preview,
+            total_characters=document.total_characters,
+            file_type=document.file_type,
+            upload_timestamp=document.upload_timestamp
         )
     except Exception as e:
         logger.error(f"Error processing document: {str(e)}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={
-                "message": "An error occurred while processing the document",
-                "error": str(e)
-            }
-        )
+        raise HTTPException(status_code=500, detail="An error occurred while processing the document")
 
 
-@router.get("/v1/documents")
+@router.get("/v1/documents", response_model=DocumentListResponse)
 async def list_documents(
         skip: int = Query(0, ge=0),
         limit: int = Query(10, ge=1, le=100),
         api_key: str = Depends(verify_api_key)
-) -> List[Dict]:
+) -> DocumentListResponse:
     documents = document_ingestion.document_store.get_documents()
-    return documents[skip: skip + limit]
+    paginated_documents = documents[skip: skip + limit]
+
+    return DocumentListResponse(
+        documents=[
+            DocumentResponse(
+                id=doc.id,
+                filename=doc.filename,
+                content_preview=doc.content_preview,
+                total_characters=doc.total_characters,
+                file_type=doc.file_type,
+                upload_timestamp=doc.upload_timestamp
+            ) for doc in paginated_documents
+        ]
+    )

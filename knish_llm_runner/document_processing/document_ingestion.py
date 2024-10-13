@@ -1,5 +1,7 @@
 import os
-from typing import Dict
+from datetime import datetime, timezone
+
+from ..models.document import Document
 from ..utils.logging import setup_logging
 from ..config import CONFIG
 from .document_store import DocumentStore
@@ -26,21 +28,14 @@ class DocumentIngestion:
         # Ensure the temp directory exists
         os.makedirs(self.temp_file_path, exist_ok=True)
 
-    def ingest(self, file_path: str) -> Dict[str, str]:
-        """
-        Ingest a document and return its content.
-        """
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"File not found: {file_path}")
+    async def ingest_and_process(self, file_path: str) -> Document:
+        document = self.ingest(file_path)
+        await self.process_and_store(document)
+        return document
 
-        if os.path.getsize(file_path) > self.max_file_size:
-            raise ValueError(f"File size exceeds the maximum allowed size of {self.max_file_size} bytes")
-
-        _, file_extension = os.path.splitext(file_path)
-        if file_extension.lower() not in self.supported_extensions:
-            raise ValueError(f"Unsupported file type: {file_extension}")
-
+    def ingest(self, file_path: str) -> Document:
         try:
+            file_extension = os.path.splitext(file_path)[1]
             if file_extension.lower() in ['.txt', '.md']:
                 with open(file_path, 'r', encoding='utf-8') as file:
                     content = file.read()
@@ -49,15 +44,17 @@ class DocumentIngestion:
             else:
                 raise NotImplementedError(f"Processing for {file_extension} is not implemented yet.")
 
-            # Create a document record
-            document = {
-                "id": str(uuid.uuid4()),
-                "filename": os.path.basename(file_path),
-                "content": content,  # Store full content
-                "content_preview": content[:500] + "...",
-                "total_characters": len(content),
-                "file_type": file_extension.lower()
-            }
+            upload_timestamp = datetime.now(timezone.utc).isoformat()
+
+            document = Document(
+                id=str(uuid.uuid4()),
+                content=content,
+                metadata={
+                    "filename": os.path.basename(file_path),
+                    "file_type": file_extension.lower(),
+                    "upload_timestamp": upload_timestamp
+                }
+            )
 
             # Add to document store
             self.document_store.add_document(document)
@@ -68,37 +65,32 @@ class DocumentIngestion:
             logger.error(f"Error ingesting document {file_path}: {str(e)}")
             raise
 
-    async def ingest_and_process(self, file_path: str) -> Dict[str, str]:
-        document = self.ingest(file_path)
-        await self.process_and_store(document)
-        return document
-
-    async def process_and_store(self, document: Dict[str, str]):
+    async def process_and_store(self, document: Document):
         try:
-            logger.debug(f"Processing document: {document['id']}")
+            logger.debug(f"Processing document: {document.id}")
 
-            if 'content' not in document:
-                raise ValueError("Document content not found")
-
-            chunks = self.text_chunker.chunk_text(document['content'])
+            chunks = self.text_chunker.chunk_text(document.content)
             logger.debug(f"Created {len(chunks)} chunks")
 
             embeddings = self.embedding_generator.generate_embeddings(chunks)
             logger.debug(f"Generated {len(embeddings)} embeddings")
 
-            await self.vector_store.add_documents([
-                {
-                    "id": str(uuid.uuid4()),  # Generate a new UUID for each chunk
-                    "content": chunk,
-                    "embedding": embedding.tolist(),
-                    "metadata": {
-                        "document_id": document['id'],
-                        "chunk_index": i
-                    }
-                }
+            documents_to_store = [
+                Document(
+                    id=str(uuid.uuid4()),
+                    content=chunk,
+                    metadata={
+                        "document_id": document.id,
+                        "chunk_index": i,
+                        "upload_timestamp": document.upload_timestamp,
+                    },
+                    embedding=embedding.tolist()  # Set embedding as a separate attribute
+                )
                 for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
-            ])
-            logger.info(f"Processed and stored document {document['id']} in vector store")
+            ]
+
+            await self.vector_store.add_documents(documents_to_store)
+            logger.info(f"Processed and stored document {document.id} in vector store at {document.upload_timestamp}")
 
         except Exception as e:
             logger.error(f"Error processing and storing document: {str(e)}", exc_info=True)

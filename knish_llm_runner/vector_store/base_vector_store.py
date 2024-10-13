@@ -1,11 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict
+from typing import List
 
-class Document:
-    def __init__(self, id: str, content: str, metadata: Dict = None):
-        self.id = id
-        self.content = content
-        self.metadata = metadata or {}
+from knish_llm_runner.models.document import Document
+
 
 class BaseVectorStore(ABC):
     @abstractmethod

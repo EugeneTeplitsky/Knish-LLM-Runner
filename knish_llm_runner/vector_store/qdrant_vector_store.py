@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
@@ -7,6 +7,7 @@ from .base_vector_store import BaseVectorStore, Document
 from ..utils.logging import setup_logging
 
 logger = setup_logging(__name__, 'vector_store')
+
 
 class QdrantVectorStore(BaseVectorStore):
     def __init__(self, host: str, port: int, collection_name: str):
@@ -19,23 +20,24 @@ class QdrantVectorStore(BaseVectorStore):
     def _ensure_collection_exists(self):
         try:
             self.client.get_collection(self.collection_name)
-        except Exception as e:
+        except Exception:
             logger.warning(f"Collection {self.collection_name} does not exist. Creating it now.")
             self.client.create_collection(
                 collection_name=self.collection_name,
                 vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE),
             )
 
-    async def add_documents(self, documents: List[Dict]):
+    async def add_documents(self, documents: List[Document]):
         try:
             points = [
                 models.PointStruct(
-                    id=doc["id"],
-                    vector=doc["embedding"],
+                    id=doc.id,
+                    vector=doc.embedding,  # Access embedding directly from the Document object
                     payload={
-                        "content": doc["content"],
-                        "document_id": doc["metadata"]["document_id"],
-                        "chunk_index": doc["metadata"]["chunk_index"]
+                        "content": doc.content,
+                        "document_id": doc.metadata.get("document_id"),
+                        "chunk_index": doc.metadata.get("chunk_index"),
+                        "upload_timestamp": doc.metadata.get("upload_timestamp")
                     }
                 )
                 for doc in documents
@@ -44,7 +46,8 @@ class QdrantVectorStore(BaseVectorStore):
                 collection_name=self.collection_name,
                 points=points
             )
-            logger.info(f"Added {len(documents)} documents to Qdrant store. Operation ID: {operation_info.operation_id}")
+            logger.info(
+                f"Added {len(documents)} documents to Qdrant store. Operation ID: {operation_info.operation_id}")
         except Exception as e:
             logger.error(f"Error adding documents to Qdrant: {str(e)}", exc_info=True)
             raise
@@ -61,7 +64,12 @@ class QdrantVectorStore(BaseVectorStore):
             Document(
                 id=result.id,
                 content=result.payload["content"],
-                metadata={k: v for k, v in result.payload.items() if k != "content"}
+                metadata={
+                    "document_id": result.payload["document_id"],
+                    "chunk_index": result.payload["chunk_index"],
+                    "upload_timestamp": result.payload["upload_timestamp"]
+                },
+                embedding=result.vector
             )
             for result in results
         ]

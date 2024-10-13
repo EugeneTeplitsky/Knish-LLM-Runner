@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routers import chat, models, health
+from .routers import chat, models, health, documents
 from .config import CONFIG
 from .services.llm_service import LLMService
 from .utils.logging import setup_logging
@@ -19,3 +19,4 @@ llm_service = LLMService(CONFIG)
 app.include_router(chat.router)
 app.include_router(models.router)
 app.include_router(health.router)
+app.include_router(documents.router)

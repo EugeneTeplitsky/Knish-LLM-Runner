@@ -15,7 +15,7 @@ def setup_logging(name: str, logfile: str = CONFIG['llm_driver']) -> logging.Log
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Create a file handler
-    log_file = os.path.join(current_dir, '..', 'logs', f'{logfile}.log')
+    log_file = os.path.join(current_dir, '..', '..', 'logs', f'{logfile}.log')
 
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
     file_handler = logging.FileHandler(log_file, encoding='utf-8')

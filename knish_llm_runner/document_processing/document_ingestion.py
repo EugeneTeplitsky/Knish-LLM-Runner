@@ -87,7 +87,15 @@ class DocumentIngestion:
             logger.debug(f"Generated {len(embeddings)} embeddings")
 
             await self.vector_store.add_documents([
-                {"id": f"{document['id']}_{i}", "content": chunk, "embedding": embedding.tolist()}
+                {
+                    "id": str(uuid.uuid4()),  # Generate a new UUID for each chunk
+                    "content": chunk,
+                    "embedding": embedding.tolist(),
+                    "metadata": {
+                        "document_id": document['id'],
+                        "chunk_index": i
+                    }
+                }
                 for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
             ])
             logger.info(f"Processed and stored document {document['id']} in vector store")

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
@@ -26,13 +26,17 @@ class QdrantVectorStore(BaseVectorStore):
                 vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE),
             )
 
-    async def add_documents(self, documents: List[Document]):
+    async def add_documents(self, documents: List[Dict]):
         try:
             points = [
                 models.PointStruct(
                     id=doc["id"],
                     vector=doc["embedding"],
-                    payload={"content": doc["content"]}
+                    payload={
+                        "content": doc["content"],
+                        "document_id": doc["metadata"]["document_id"],
+                        "chunk_index": doc["metadata"]["chunk_index"]
+                    }
                 )
                 for doc in documents
             ]

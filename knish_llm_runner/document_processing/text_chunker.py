@@ -7,6 +7,7 @@ logger = setup_logging(__name__, 'document_processing')
 def check_nltk_availability():
     try:
         import nltk
+        nltk.download('punkt_tab')
         nltk.data.find('tokenizers/punkt')
         return True
     except (ImportError, LookupError):

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from qdrant_client import QdrantClient
@@ -32,12 +33,13 @@ class QdrantVectorStore(BaseVectorStore):
             points = [
                 models.PointStruct(
                     id=doc.id,
-                    vector=doc.embedding,  # Access embedding directly from the Document object
+                    vector=doc.embedding,
                     payload={
                         "content": doc.content,
-                        "document_id": doc.metadata.get("document_id"),
-                        "chunk_index": doc.metadata.get("chunk_index"),
-                        "upload_timestamp": doc.metadata.get("upload_timestamp")
+                        "document_id": doc.metadata.get("document_id", ""),
+                        "chunk_index": doc.metadata.get("chunk_index", 0),
+                        "upload_timestamp": doc.metadata.get("upload_timestamp",
+                                                             datetime.now().isoformat())
                     }
                 )
                 for doc in documents
@@ -63,11 +65,12 @@ class QdrantVectorStore(BaseVectorStore):
         return [
             Document(
                 id=result.id,
-                content=result.payload["content"],
+                content=result.payload.get("content", ""),
                 metadata={
-                    "document_id": result.payload["document_id"],
-                    "chunk_index": result.payload["chunk_index"],
-                    "upload_timestamp": result.payload["upload_timestamp"]
+                    "document_id": result.payload.get("document_id"),
+                    "chunk_index": result.payload.get("chunk_index"),
+                    "upload_timestamp": result.payload.get("upload_timestamp",
+                                                           datetime.now().isoformat())
                 },
                 embedding=result.vector
             )

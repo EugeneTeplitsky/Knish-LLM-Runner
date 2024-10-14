@@ -9,7 +9,7 @@ async def test_anthropic_driver(config, driver_selector):
     service.driver = driver
 
     messages = [{"role": "user", "content": "Say 'Hello, World!'"}]
-    completion, query_id, token_usage = await service.generate_completion(messages)
+    completion, query_id, token_usage = await service.generate(messages)
 
     assert isinstance(completion, str), f"Expected string, got {type(completion)}"
     assert "Hello, World!" in completion

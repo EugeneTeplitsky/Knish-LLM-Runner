@@ -13,18 +13,18 @@ async def test_ollama_driver(config, driver_selector):
         service.driver = driver
 
         messages = [{"role": "user", "content": "Say 'Hello, World!'"}]
-        completion, query_id, token_usage = await service.generate_completion(messages)
+        completion, query_id, token_usage = await service.generate(messages)
 
         assert isinstance(completion, str), f"Expected string, got {type(completion)}"
         assert len(completion.strip()) > 0, "Completion should not be empty"
         assert any(word in completion.lower() for word in ['hello', 'hi', 'greet']), \
-            f"Expected a greeting, but got: {completion[:100]}..."  # Show first 100 chars if assertion fails
+            f"Expected a greeting, but got: {completion[:100]}..."
         assert isinstance(query_id, str), f"Expected string, got {type(query_id)}"
         assert isinstance(token_usage, dict), f"Expected dict, got {type(token_usage)}"
         assert all(key in token_usage for key in ['prompt_tokens', 'completion_tokens', 'total_tokens']), \
             f"Token usage dict missing expected keys. Got: {token_usage.keys()}"
 
-        logger.info(f"Ollama driver test passed. Completion: {completion[:100]}...")  # Log first 100 chars of completion
+        logger.info(f"Ollama driver test passed. Completion: {completion[:100]}...")
     except Exception as e:
         logger.error(f"Error in test_ollama_driver: {str(e)}", exc_info=True)
         raise

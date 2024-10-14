@@ -1,14 +1,16 @@
 # Knish LLM Runner
 
-Knish LLM Runner is a FastAPI-based service for running large language models (LLMs) with support for multiple providers.
+Knish LLM Runner is a FastAPI-based service for running large language models (LLMs) with support for multiple providers and Retrieval-Augmented Generation (RAG).
 
 ## Features
 
 - Support for multiple LLM providers (OpenAI, Anthropic, Ollama, ARM)
 - Asynchronous request handling
 - Built-in caching and queuing system
+- Retrieval-Augmented Generation (RAG) using vector store
+- OpenAI-compatible API endpoints
 - Configurable via environment variables or command-line arguments
-- Extensible architecture using factory patterns for drivers and databases
+- Extensible architecture using factory patterns for drivers, databases, and vector stores
 
 ## Installation
 
@@ -41,6 +43,10 @@ Configure the application using environment variables or by creating a `.env` fi
 - `DB_PATH`: Database path (default: llm_api_runner.db)
 - `RUNNER_HOST`: Host to run the server on (default: 0.0.0.0)
 - `RUNNER_PORT`: Port to run the server on (default: 8008)
+- `VECTOR_STORE_TYPE`: Vector store to use for RAG (default: qdrant)
+- `QDRANT_HOST`: Qdrant host (default: localhost)
+- `QDRANT_PORT`: Qdrant port (default: 6333)
+- `QDRANT_COLLECTION_NAME`: Qdrant collection name (default: documents)
 
 ## Running the Server
 
@@ -58,34 +64,46 @@ python run_server.py --host 127.0.0.1 --port 8000 --llm-driver openai --temperat
 
 ## API Usage
 
-### Generate Completion
+### Chat Completion
 
-Send a POST request to `/generate` with the following JSON body:
+Send a POST request to `/v1/chat/completions` with the following JSON body:
 
 ```json
 {
+  "model": "gpt-3.5-turbo",
   "messages": [
     {"role": "system", "content": "You are a helpful assistant."},
     {"role": "user", "content": "Hello, how are you?"}
   ],
   "temperature": 0.7,
-  "max_tokens": 100
+  "max_tokens": 100,
+  "stream": false
 }
 ```
 
-The response will be a streaming response with the following format:
+For streaming responses, set `"stream": true` in the request body.
 
-```json
-{
-  "full_response": "Hello! As an AI language model, I don't have feelings, but I'm functioning well and ready to assist you. How can I help you today?",
-  "json_response": null,
-  "query_id": "openai:1234567890"
-}
-```
+### List Models
+
+Send a GET request to `/v1/models` to list available models.
+
+### Document Upload
+
+Send a POST request to `/v1/documents` with a file upload to add documents to the vector store for RAG.
 
 ### Health Check
 
 Send a GET request to `/health` to check the server status.
+
+## RAG Functionality
+
+The Retrieval-Augmented Generation (RAG) feature enhances LLM responses by retrieving relevant information from the vector store. When a query is received, the system:
+
+1. Searches the vector store for relevant documents
+2. Enhances the prompt with retrieved information
+3. Generates a response using the enhanced prompt
+
+This results in more informed and context-aware responses from the LLM.
 
 ## Testing
 

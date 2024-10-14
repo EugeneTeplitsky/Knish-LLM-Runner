@@ -4,6 +4,7 @@ from knish_llm_runner import LLMService, CONFIG
 
 logger = logging.getLogger(__name__)
 
+
 @pytest.mark.asyncio
 @pytest.mark.skipif(not CONFIG.get('arm_model_path'), reason="ARM model path not found")
 async def test_arm_driver(config, driver_selector):

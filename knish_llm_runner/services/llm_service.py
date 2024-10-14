@@ -3,11 +3,11 @@ from ..drivers.driver_factory import LLMDriverFactory
 from ..database.database_factory import DatabaseFactory
 from ..utils.logging import setup_logging
 from ..config import CONFIG
-from .queue_service import queue_service
 from ..utils.prompt import enhance_messages_with_context, count_tokens
 from ..vector_store.vector_store_factory import VectorStoreFactory
 
 logger = setup_logging(__name__, 'service')
+
 
 class LLMService:
     def __init__(self, config: Dict):
@@ -82,9 +82,9 @@ class LLMService:
             max_tokens: int
     ) -> AsyncGenerator[str, None]:
         async for chunk in self.driver.generate_stream(
-            messages=messages,
-            temperature=temperature or CONFIG['temperature'],
-            max_tokens=max_tokens or CONFIG['max_tokens']
+                messages=messages,
+                temperature=temperature or CONFIG['temperature'],
+                max_tokens=max_tokens or CONFIG['max_tokens']
         ):
             yield chunk
 

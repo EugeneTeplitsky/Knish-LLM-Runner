@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.mark.asyncio
 async def test_sqlite_database_record_and_retrieve(test_db):
     query = "Test query"
@@ -20,6 +21,7 @@ async def test_sqlite_database_record_and_retrieve(test_db):
     assert retrieved['driver'] == driver
     assert retrieved['output'] == output
     assert retrieved['token_usage'] == token_usage
+
 
 @pytest.mark.asyncio
 async def test_sqlite_database_nonexistent_query(test_db):

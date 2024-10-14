@@ -17,7 +17,7 @@ def mock_verify_api_key():
 def mock_llm_service():
     with patch('knish_llm_runner.routers.chat.LLMService') as mock:
         mock.return_value.generate = AsyncMock(return_value=(
-        "Test completion", "test_query_id", {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}))
+            "Test completion", "test_query_id", {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}))
         mock.return_value.vector_store = MagicMock()
         mock.return_value.vector_store.search = AsyncMock(return_value=[])
         yield mock

@@ -4,6 +4,7 @@ from knish_llm_runner import CONFIG, LLMService
 
 logger = logging.getLogger(__name__)
 
+
 @pytest.mark.asyncio
 @pytest.mark.skipif(not CONFIG.get('ollama_model'), reason="Ollama model not found")
 async def test_ollama_driver(config, driver_selector):

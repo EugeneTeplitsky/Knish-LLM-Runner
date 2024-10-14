@@ -8,10 +8,12 @@ from knish_llm_runner.models.document import Document
 
 client = TestClient(app)
 
+
 @pytest.fixture(autouse=True)
 def mock_verify_api_key():
     with patch('knish_llm_runner.utils.auth.verify_api_key', return_value="test_api_key"):
         yield
+
 
 @pytest.fixture
 def mock_document_ingestion():
@@ -47,6 +49,7 @@ def mock_document_ingestion():
         ]
         yield mock
 
+
 def test_upload_document(mock_document_ingestion):
     file_content = b"This is a test document"
     response = client.post(
@@ -63,6 +66,7 @@ def test_upload_document(mock_document_ingestion):
     assert data["file_type"] == ".txt"
     assert data["upload_timestamp"] == "2024-10-14T12:00:00Z"
 
+
 def test_list_documents(mock_document_ingestion):
     response = client.get(
         "/v1/documents",
@@ -73,6 +77,7 @@ def test_list_documents(mock_document_ingestion):
     assert len(data["documents"]) == 2
     assert data["documents"][0]["id"] == "doc1"
     assert data["documents"][1]["id"] == "doc2"
+
 
 def test_upload_document_invalid_api_key():
     response = client.post(

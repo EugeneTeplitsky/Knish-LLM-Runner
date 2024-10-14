@@ -7,10 +7,12 @@ from unittest.mock import patch, AsyncMock
 
 client = TestClient(app)
 
+
 @pytest.fixture(autouse=True)
 def mock_verify_api_key():
     with patch('knish_llm_runner.utils.auth.verify_api_key', return_value="test_api_key"):
         yield
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("llm_driver,mock_models,expected_models", [
@@ -39,6 +41,7 @@ async def test_list_models(llm_driver, mock_models, expected_models):
                 assert model["object"] == "model"
                 assert isinstance(model["created"], int)
                 assert model["owned_by"] == "organization-owner"
+
 
 @pytest.mark.asyncio
 async def test_list_models_unknown_driver():

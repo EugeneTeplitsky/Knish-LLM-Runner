@@ -13,6 +13,7 @@ import time
 
 router = APIRouter()
 
+
 @router.post("/v1/chat/completions", response_model=ChatCompletionResponse)
 async def create_chat_completion(
         request: ChatCompletionRequest,
@@ -33,10 +34,11 @@ async def create_chat_completion(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+
 async def generate_chat_completion(
-    request: ChatCompletionRequest,
-    llm_service: LLMService,
-    messages: List[Dict[str, str]]
+        request: ChatCompletionRequest,
+        llm_service: LLMService,
+        messages: List[Dict[str, str]]
 ):
     completion, query_id, token_usage = await llm_service.generate(
         messages=messages,

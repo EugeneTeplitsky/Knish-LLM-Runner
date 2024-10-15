@@ -11,8 +11,10 @@ from ..utils.auth import verify_api_key
 import json
 import time
 
-router = APIRouter()
+from ..utils.logging import setup_logging
 
+router = APIRouter()
+logger = setup_logging(__name__, 'api')
 
 @router.post("/v1/chat/completions", response_model=ChatCompletionResponse)
 async def create_chat_completion(
@@ -21,6 +23,7 @@ async def create_chat_completion(
         llm_service: LLMService = Depends(lambda: LLMService(CONFIG))
 ):
     try:
+        logger.error(f"Processing chat completion: {request.model_dump()}", exc_info=True)
         messages = [msg.model_dump() for msg in request.messages]
         if request.stream:
             return StreamingResponse(

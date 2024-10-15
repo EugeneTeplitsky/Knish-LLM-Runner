@@ -13,7 +13,7 @@ async def test_openai_driver(config, driver_selector):
         service = LLMService(config)
         service.driver = driver
 
-        messages = [{"role": "user", "content": "Say 'Hello, World!'"}]
+        messages = [{"role": "user", "content": "Please output ONLY the words: 'Hello, World!'"}]
         completion, query_id, token_usage = await service.generate(messages)
 
         assert isinstance(completion, str), f"Expected string, got {type(completion)}"

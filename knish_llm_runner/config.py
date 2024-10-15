@@ -64,7 +64,7 @@ def get_config():
             'pdf_extraction_timeout': 300,  # 5 minutes
             'temp_file_path': 'temp/',  # Temporary file storage path
             'embedding_model': 'all-MiniLM-L6-v2',  # Sentence transformer model
-        },
+        }
     }
 
 

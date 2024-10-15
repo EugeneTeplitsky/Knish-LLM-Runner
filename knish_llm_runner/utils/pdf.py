@@ -1,4 +1,4 @@
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 
 from knish_llm_runner.utils.logging import setup_logging
 

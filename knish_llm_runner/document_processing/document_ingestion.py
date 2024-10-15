@@ -28,18 +28,21 @@ class DocumentIngestion:
         # Ensure the temp directory exists
         os.makedirs(self.temp_file_path, exist_ok=True)
 
-    async def ingest_and_process(self, file_path: str) -> Document:
-        document = self.ingest(file_path)
+    async def ingest_and_process(self, file_path: str, document_id: str = None) -> Document:
+        document = self.ingest_file(file_path, document_id)
         await self.process_and_store(document)
         return document
 
-    def ingest(self, file_path: str) -> Document:
+    def ingest_file(self, file_path: str, document_id: str = None) -> Document:
         try:
-            file_extension = os.path.splitext(file_path)[1]
-            if file_extension.lower() in ['.txt', '.md']:
+            file_extension = os.path.splitext(file_path)[1].lower()
+            if file_extension not in self.supported_extensions:
+                raise ValueError(f"Unsupported file type: {file_extension}")
+
+            if file_extension in ['.txt', '.md']:
                 with open(file_path, 'r', encoding='utf-8') as file:
                     content = file.read()
-            elif file_extension.lower() == '.pdf':
+            elif file_extension == '.pdf':
                 content = process_pdf(file_path)
             else:
                 raise NotImplementedError(f"Processing for {file_extension} is not implemented yet.")
@@ -47,11 +50,11 @@ class DocumentIngestion:
             upload_timestamp = datetime.now(timezone.utc).isoformat()
 
             document = Document(
-                id=str(uuid.uuid4()),
+                id=document_id or str(uuid.uuid4()),
                 content=content,
                 metadata={
                     "filename": os.path.basename(file_path),
-                    "file_type": file_extension.lower(),
+                    "file_type": file_extension,
                     "upload_timestamp": upload_timestamp
                 }
             )
@@ -59,7 +62,7 @@ class DocumentIngestion:
             # Add to document store
             self.document_store.add_document(document)
 
-            logger.info(f"Successfully ingested document: {file_path}")
+            logger.info(f"Successfully ingested document: {file_path} with ID: {document.id}")
             return document
         except Exception as e:
             logger.error(f"Error ingesting document {file_path}: {str(e)}")

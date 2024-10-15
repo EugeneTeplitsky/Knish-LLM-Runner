@@ -20,13 +20,22 @@ async def upload_document(
         api_key: str = Depends(verify_api_key)
 ):
     try:
-        filename = f"{uuid.uuid4()}_{file.filename}"
+        # Check file extension
+        _, file_extension = os.path.splitext(file.filename)
+        if file_extension.lower() not in CONFIG['document_processing']['supported_extensions']:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported file type. Allowed types are: {', '.join(CONFIG['document_processing']['supported_extensions'])}"
+            )
+
+        document_id = str(uuid.uuid4())
+        filename = f"{document_id}_{file.filename}"
         file_location = os.path.join(CONFIG['document_processing']['temp_file_path'], filename)
 
         with open(file_location, "wb+") as file_object:
             file_object.write(file.file.read())
 
-        document = await document_ingestion.ingest_and_process(file_location)
+        document = await document_ingestion.ingest_and_process(file_location, document_id)
 
         os.remove(file_location)
 
@@ -38,6 +47,8 @@ async def upload_document(
             file_type=document.file_type,
             upload_timestamp=document.upload_timestamp
         )
+    except HTTPException as he:
+        raise he
     except Exception as e:
         logger.error(f"Error processing document: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="An error occurred while processing the document")

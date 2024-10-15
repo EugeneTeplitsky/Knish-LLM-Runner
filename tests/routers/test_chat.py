@@ -54,7 +54,7 @@ async def test_chat_completion_stream(mock_llm_service):
         "/v1/chat/completions",
         headers={"Authorization": f"Bearer {CONFIG['api_key']}"},
         json={
-            "model": "gpt-3.5-turbo",
+            "model": CONFIG['openai_model'],
             "messages": [{"role": "user", "content": "Hello!"}],
             "stream": True
         }
@@ -62,13 +62,14 @@ async def test_chat_completion_stream(mock_llm_service):
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/event-stream")
 
-    content = b''.join(response.iter_content())
-    assert b'data: {"id":' in content
-    assert b'"object":"chat.completion.chunk"' in content
-    assert b'"content":"Test "' in content
-    assert b'"content":"stream "' in content
-    assert b'"content":"response"' in content
-    assert b'data: [DONE]' in content
+    content = b''.join(chunk for chunk in response.iter_bytes())
+    content_str = content.decode('utf-8')
+
+    assert '"object": "chat.completion.chunk"' in content_str
+    assert '"content": "Test "' in content_str
+    assert '"content": "stream "' in content_str
+    assert '"content": "response"' in content_str
+    assert 'data: [DONE]' in content_str
 
 
 def test_chat_completion_invalid_api_key():

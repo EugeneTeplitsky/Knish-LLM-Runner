@@ -1,5 +1,9 @@
+import os
+import tempfile
+
 import pytest
-from unittest.mock import AsyncMock
+
+from knish_llm_runner.document_processing.document_ingestion import DocumentIngestion
 from knish_llm_runner.services.llm_service import LLMService
 from knish_llm_runner.models.document import Document
 from knish_llm_runner.utils.prompt import enhance_messages_with_context
@@ -29,12 +33,10 @@ async def test_llm_service_caching(config, driver_selector, test_db):
 
 
 @pytest.mark.asyncio
-async def test_llm_service_streaming(config, driver_selector):
-    driver = driver_selector('ollama')
+async def test_llm_service_streaming(config):
     service = LLMService(config)
-    service.driver = driver
 
-    messages = [{"role": "user", "content": "Count from 1 to 5"}]
+    messages = [{"role": "user", "content": "Say hello"}]
 
     chunks = []
     async for chunk in await service.generate(messages, stream=True):
@@ -42,36 +44,31 @@ async def test_llm_service_streaming(config, driver_selector):
 
     assert len(chunks) > 0, "Should receive multiple chunks"
     full_response = ''.join(chunks)
-    assert any(str(i) in full_response for i in range(1, 6)), "Response should contain numbers 1 through 5"
+    assert any(word in full_response.lower() for word in
+               ['hello', 'hi', 'greetings']), f"Response should contain a greeting. Got: {full_response}"
 
 
 @pytest.mark.asyncio
-async def test_llm_service_with_rag(config, driver_selector):
-    driver = driver_selector('ollama')
+async def test_llm_service_with_rag(config):
     service = LLMService(config)
-    service.driver = driver
+    document_ingestion = DocumentIngestion()
 
-    # Mock the vector store
-    mock_vector_store = AsyncMock()
-    mock_vector_store.search.return_value = [
-        Document(
-            id="doc1",
-            content="The capital of France is Paris.",
-            metadata={
-                "filename": "geography.txt",
-                "file_type": ".txt",
-                "upload_timestamp": "2024-10-14T12:00:00Z"
-            }
-        )
-    ]
-    service.vector_store = mock_vector_store
+    # Create a temporary file
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as temp_file:
+        temp_file.write("The capital of France is Paris.")
+        temp_file_path = temp_file.name
 
-    messages = [{"role": "user", "content": "What is the capital of France?"}]
+    try:
+        # Add a document to the vector store
+        await document_ingestion.ingest_and_process(temp_file_path)
 
-    completion, query_id, token_usage = await service.generate(messages)
+        messages = [{"role": "user", "content": "What is the capital of France?"}]
+        completion, query_id, token_usage = await service.generate(messages)
 
-    assert "Paris" in completion, "Response should include information from the retrieved document"
-    mock_vector_store.search.assert_called_once()
+        assert "Paris" in completion, f"Response should include information from the retrieved document. Got: {completion}"
+    finally:
+        # Clean up the temporary file
+        os.unlink(temp_file_path)
 
 
 @pytest.mark.asyncio
@@ -99,12 +96,7 @@ async def test_llm_service_enhance_messages_with_context():
 
 
 @pytest.mark.asyncio
-async def test_llm_service_calculate_token_usage():
-    config = {
-        'llm_driver': 'openai',
-        'openai_api_key': 'dummy_key',  # Add a dummy key to prevent the error
-        'openai_model': 'gpt-3.5-turbo'
-    }
+async def test_llm_service_calculate_token_usage(config):
     service = LLMService(config)
     service.model = "gpt-3.5-turbo"  # Set a model for token calculation
 

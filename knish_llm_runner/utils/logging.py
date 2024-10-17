@@ -4,7 +4,7 @@ import os
 from ..config import CONFIG
 
 
-def setup_logging(name: str, logfile: str = CONFIG['llm_driver']) -> logging.Logger:
+def setup_logging(name: str, logfile: str = 'main') -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(CONFIG['log_level'])
 

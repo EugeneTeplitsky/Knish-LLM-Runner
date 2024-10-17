@@ -84,7 +84,6 @@ if __name__ == "__main__":
     logger.info(f"Starting server with config:")
     logger.info(f"Host: {CONFIG['runner_host']}")
     logger.info(f"Port: {CONFIG['runner_port']}")
-    logger.info(f"LLM Driver: {CONFIG['llm_driver']}")
     logger.info(f"Temperature: {CONFIG['temperature']}")
     logger.info(f"Max Tokens: {CONFIG['max_tokens']}")
     logger.info(f"Log Level: {CONFIG['log_level']}")

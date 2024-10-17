@@ -13,6 +13,17 @@ def count_tokens(text: str, model: str) -> int:
         encoder = tiktoken.get_encoding("cl100k_base")
         return len(encoder.encode(text))
 
+def calculate_token_usage(model: str, messages: List[Dict[str, str]], completion: str) -> Dict[str, int]:
+    prompt_tokens = sum(count_tokens(msg['content'], model) for msg in messages)
+    completion_tokens = count_tokens(completion, model)
+    total_tokens = prompt_tokens + completion_tokens
+
+    return {
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "total_tokens": total_tokens
+    }
+
 
 def enhance_messages_with_context(messages: List[Dict[str, str]], relevant_docs: List[Document]) -> List[
     Dict[str, str]]:

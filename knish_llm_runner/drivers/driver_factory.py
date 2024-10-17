@@ -11,20 +11,20 @@ logger = setup_logging(__name__, 'driver')
 
 class LLMDriverFactory:
     @staticmethod
-    def create_driver(config: Dict) -> BaseLLMDriver:
-        driver_type = config.get('llm_driver', 'openai')
+    def create_driver(config: Dict, driver_type: str, model: str = None) -> BaseLLMDriver:
         logger.info(f"Creating driver of type: {driver_type}")
 
         try:
             if driver_type == 'openai':
-                return OpenAIDriver(api_key=config['openai_api_key'], model=config['openai_model'])
+                return OpenAIDriver(api_key=config['openai_api_key'], model=model or config['openai_model'])
             elif driver_type == 'anthropic':
-                return AnthropicDriver(api_key=config['anthropic_api_key'], model=config['anthropic_model'])
+                return AnthropicDriver(api_key=config['anthropic_api_key'], model=model or config['anthropic_model'])
             elif driver_type == 'ollama':
-                return OllamaDriver(api_url=config['ollama_api_url'], model=config['ollama_model'])
+                return OllamaDriver(api_url=config['ollama_api_url'], model=model or config['ollama_model'])
             elif driver_type == 'arm':
                 return ARMDriver(
                     model_path=config['arm_model_path'],
+                    model=model or config['arm_model'],
                     n_ctx=config.get('arm_n_ctx', 2048),
                     n_threads=config.get('arm_n_threads', 4),
                     n_gpu_layers=config.get('arm_n_gpu_layers', 1)

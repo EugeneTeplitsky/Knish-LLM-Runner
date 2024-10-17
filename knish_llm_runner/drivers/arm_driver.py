@@ -22,15 +22,16 @@ def convert_messages_to_prompt(messages: List[Dict[str, str]]) -> str:
 
 
 class ARMDriver(BaseLLMDriver):
-    def __init__(self, model_path: str, n_ctx: int = 2048, n_threads: int = 4, n_gpu_layers: int = 1):
+    def __init__(self, model_path: str, model: str, n_ctx: int = 2048, n_threads: int = 4, n_gpu_layers: int = 1):
         try:
+            full_model_path = os.path.join(model_path, model)
             self.llm = Llama(
-                model_path=model_path,
+                model_path=full_model_path,
                 n_ctx=n_ctx,
                 n_threads=n_threads,
                 n_gpu_layers=n_gpu_layers
             )
-            logger.info(f"Initialized ARM driver with model: {model_path}")
+            logger.info(f"Initialized ARM driver with model: {full_model_path}")
         except Exception as e:
             logger.error(f"Failed to initialize ARM driver: {str(e)}")
             raise LLMError(f"ARM initialization error: {str(e)}")
@@ -77,5 +78,5 @@ class ARMDriver(BaseLLMDriver):
 
     async def get_available_models(self) -> List[str]:
         if CONFIG.get('arm_model_path'):
-            return [os.path.splitext(os.path.basename(CONFIG.get('arm_model_path')))[0]]
+            return os.listdir(CONFIG['arm_model_path'])
         return []

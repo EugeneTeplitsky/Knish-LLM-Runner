@@ -12,7 +12,7 @@ logger = setup_logging(__name__, 'vector_store')
 
 class QdrantVectorStore(BaseVectorStore):
     def __init__(self, host: str, port: int, collection_name: str):
-        self.client = QdrantClient(host=host, port=port)
+        self.client = QdrantClient(host=host, port=port, timeout=3000)
         self.collection_name = collection_name
         self.encoder = SentenceTransformer('all-MiniLM-L6-v2')
         logger.info(f"Initialized Qdrant store with collection: {collection_name}")
@@ -46,7 +46,7 @@ class QdrantVectorStore(BaseVectorStore):
             ]
             operation_info = self.client.upsert(
                 collection_name=self.collection_name,
-                points=points
+                points=points,
             )
             logger.info(
                 f"Added {len(documents)} documents to Qdrant store. Operation ID: {operation_info.operation_id}")

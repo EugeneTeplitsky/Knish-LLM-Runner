@@ -29,7 +29,6 @@ def test_client():
 def driver_selector():
     def _select_driver(driver_type):
         test_config = CONFIG.copy()
-        test_config['llm_driver'] = driver_type
-        return LLMDriverFactory.create_driver(test_config)
+        return LLMDriverFactory.create_driver(test_config, driver_type)
 
     return _select_driver

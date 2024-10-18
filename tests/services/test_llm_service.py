@@ -6,7 +6,7 @@ import pytest
 from knish_llm_runner.document_processing.document_ingestion import DocumentIngestion
 from knish_llm_runner.services.llm_service import LLMService
 from knish_llm_runner.models.document import Document
-from knish_llm_runner.utils.prompt import enhance_messages_with_context
+from knish_llm_runner.utils.prompt import enhance_messages_with_context, calculate_token_usage
 
 
 @pytest.mark.asyncio
@@ -106,7 +106,7 @@ async def test_llm_service_calculate_token_usage(config):
     ]
     completion = "The capital of France is Paris."
 
-    token_usage = service._calculate_token_usage(messages, completion)
+    token_usage = calculate_token_usage(service.model, messages, completion)
 
     assert "prompt_tokens" in token_usage
     assert "completion_tokens" in token_usage

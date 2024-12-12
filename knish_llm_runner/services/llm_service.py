@@ -41,20 +41,21 @@ class LLMService:
                 return cached_response['output'], cached_response['id'], cached_response['token_usage']
 
             relevant_docs = await self.vector_store.search(query, top_k=3)
-            enhanced_messages = enhance_messages_with_context(messages, relevant_docs)
+            if relevant_docs not in [None, []]:
+                messages = enhance_messages_with_context(messages, relevant_docs)
 
-            logger.info(f"Enhanced messages: {enhanced_messages}")
+            logger.info(f"Enhanced messages: {messages}")
 
             if stream:
                 return self._generate_stream(
-                    messages=enhanced_messages,
+                    messages=messages,
                     temperature=temperature,
                     max_tokens=max_tokens,
                     model=model
                 )
             else:
                 return await self._generate_completion(
-                    messages=enhanced_messages,
+                    messages=messages,
                     temperature=temperature,
                     max_tokens=max_tokens,
                     model=model
@@ -94,10 +95,10 @@ class LLMService:
 
         # Recording the query
         query_id = await self.db_connector.record_query(
-            messages[-1]['content'],
-            CONFIG['default_driver_type'],
-            completion,
-            token_usage
+            query=messages[-1]['content'],
+            driver=model,
+            output=completion,
+            token_usage=token_usage
         )
 
         return completion, query_id, token_usage

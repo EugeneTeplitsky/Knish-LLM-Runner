@@ -92,5 +92,4 @@ class AnthropicDriver(BaseLLMDriver):
 
     async def get_available_models(self) -> List[str]:
         # Anthropic doesn't have a models list endpoint, so we'll return a predefined list
-        return ["claude-3-5-sonnet-20240620", "claude-3-opus-20240229", "claude-3-sonnet-20240229",
-                "claude-3-haiku-20240307"]
+        return ["claude-3-5-sonnet-20241022", "claude-3-opus-20240229", "claude-3-5-haiku-20241022"]

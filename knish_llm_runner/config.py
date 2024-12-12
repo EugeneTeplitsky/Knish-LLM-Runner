@@ -21,8 +21,7 @@ def get_config():
         'log_level': str(os.getenv('LOG_LEVEL', 'INFO')),
 
         # LLM driver and model
-        'default_llm': str(os.getenv('LLM_MODEL', 'openai:gpt-3.5-turbo')),
-        'default_driver_type': str(os.getenv('LLM_DRIVER', 'openai')),
+        'default_llm': str(os.getenv('DEFAULT_LLM_MODEL', 'openai:gpt-3.5-turbo')),
 
         # OpenAI settings
         'openai_api_key': str(os.getenv('OPENAI_API_KEY')),
@@ -54,6 +53,14 @@ def get_config():
         'qdrant_host': str(os.getenv('QDRANT_HOST', 'localhost')),
         'qdrant_port': int(os.getenv('QDRANT_PORT', '6333')),
         'qdrant_collection_name': str(os.getenv('QDRANT_COLLECTION_NAME', 'documents')),
+        'qdrant_batch_size': int(os.getenv('QDRANT_BATCH_SIZE', '100')),
+        'qdrant_timeout': int(os.getenv('QDRANT_TIMEOUT', '3000')),
+        'qdrant_prefer_grpc': bool(os.getenv('QDRANT_PREFER_GRPC', 'true').lower() == 'true'),
+        'qdrant_pool_size': int(os.getenv('QDRANT_POOL_SIZE', '5')),
+        'qdrant_on_disk': bool(os.getenv('QDRANT_ON_DISK', 'true').lower() == 'true'),
+        'qdrant_quantization': bool(os.getenv('QDRANT_QUANTIZATION', 'true').lower() == 'true'),
+        'qdrant_search_type': str(os.getenv('QDRANT_SEARCH_TYPE', 'hybrid')),
+        'qdrant_embedding_model': str(os.getenv('QDRANT_EMBEDDING_MODEL', 'all-MiniLM-L6-v2')),
 
         # Database settings
         'db_type': str(os.getenv('DB_TYPE', 'sqlite')),
